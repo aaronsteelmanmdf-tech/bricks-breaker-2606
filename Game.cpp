@@ -40,6 +40,15 @@ void Game::Reset()
 	brick.x_position = 25;
 	brick.y_position = 9;
 	bricks.push_back(brick);
+
+	textBox.x_position = 10;
+	textBox.y_position = 10;
+	textBox.width = 40;
+	textBox.height = 10;
+	textBox.doubleThick = true;
+	textBox.color = ConsoleColor::Cyan;
+
+	victoryCondition = 0;
 }
 
 void Game::ResetBall()
@@ -86,6 +95,15 @@ void Game::Render() const
 	for (int brickNum = 0; brickNum < bricks.size(); brickNum++) {
 		bricks[brickNum].Draw();
 	}
+
+	if (victoryCondition == 1) {
+		textBox.Draw();
+		Console::WordWrap(textBox.x_position + 2, textBox.y_position + 2, textBox.width - 2, victoryMsg);
+	}
+	else if (victoryCondition == 2) {
+		textBox.Draw();
+		Console::WordWrap(textBox.x_position + 2, textBox.y_position + 2, textBox.width - 2, defeatMsg);
+	}
 	
 
 	Console::Lock(false);
@@ -109,11 +127,19 @@ void Game::CheckCollision()
 	}
 	
 	// TODO #6 - If no bricks remain, pause ball and display (render) victory text with R to reset
+	if (bricks.empty()) {
+		ResetBall();
+		victoryCondition = 1;
+	}
 
 
 	if (paddle.Contains(ball.x_position + ball.x_velocity, ball.y_velocity + ball.y_position))
 	{
 		ball.y_velocity *= -1;
+	}
+	else if (ball.y_position == 30 && !paddle.Contains(ball.x_position + ball.x_velocity, ball.y_velocity + ball.y_position)) {
+		ResetBall();
+		victoryCondition = 2;
 	}
 
 	// TODO #7 - If ball touches bottom of window, pause ball and display (render) defeat text with R to reset
